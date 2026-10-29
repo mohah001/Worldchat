@@ -1,0 +1,93 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f5ff;
+  color: #17233c;
+}
+
+header {
+  background: #101827;
+  color: white;
+  text-align: center;
+  padding: 28px 15px;
+}
+
+header h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+}
+
+header p {
+  color: #cbd5e1;
+}
+
+main {
+  max-width: 760px;
+  margin: auto;
+  padding: 22px 15px;
+}
+
+.welcome {
+  background: white;
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 18px;
+  box-shadow: 0 5px 20px #00000010;
+}
+
+.welcome h2 {
+  font-size: 27px;
+}
+
+.welcome p {
+  line-height: 1.7;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+#message {
+  color: #166534;
+  font-weight: bold;
+}
+
+.features {
+  margin-top: 22px;
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+}
+
+.features p {
+  padding: 10px;
+  background: #f0f5ff;
+  border-radius: 8px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+}
+
+@media (max-width: 480px) {
+  .welcome h2 {
+    font-size: 23px;
+  }
+}
