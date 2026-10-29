@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>WorldChat - Meet the World</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🌍 WorldChat</h1>
+    <p>One world. Millions of conversations.</p>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <h2>Meet people around the world</h2>
+      <p>Make international friends, discover new cultures, and practise languages.</p>
+      <button onclick="showMessage()">Get Started</button>
+      <p id="message" aria-live="polite"></p>
+    </section>
+
+    <section class="features">
+      <h2>Discover a world of friends</h2>
+      <p>🌎 Meet people from different countries</p>
+      <p>💬 Start conversations</p>
+      <p>🤝 Make new friends</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 WorldChat</p>
+  </footer>
+
+  <script>
+    function showMessage() {
+      document.getElementById("message").textContent =
+        "Welcome to WorldChat! Registration is coming soon.";
+    }
+  </script>
+</body>
+</html>
+  
