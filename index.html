@@ -1,4 +1,4 @@
-<!-- WorldChat Pages rebuild -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +40,28 @@
         "Welcome to WorldChat! Registration is coming soon.";
     }
   </script>
+
+  <!-- Firebase connection -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBYCRgvs3_A0Ph7R3nW21GONpCDQFJQhOk",
+      authDomain: "worldchat-67ec4.firebaseapp.com",
+      projectId: "worldchat-67ec4",
+      storageBucket: "worldchat-67ec4.firebasestorage.app",
+      messagingSenderId: "319447383919",
+      appId: "1:319447383919:web:1dde647d2041618933729a"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    console.log("WorldChat connected to Firebase!");
+  </script>
 </body>
 </html>
-  
