@@ -3,11 +3,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>WorldChat - Meet the World</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: Arial, sans-serif; }
     .account {
       max-width: 400px;
       margin: 25px auto;
@@ -16,17 +15,11 @@
       color: #101827;
       border-radius: 12px;
     }
-    .account input {
+    .account input, .account button {
+      box-sizing: border-box;
       width: 100%;
       padding: 12px;
       margin: 8px 0;
-      box-sizing: border-box;
-    }
-    .account button {
-      padding: 12px;
-      margin: 6px 0;
-      width: 100%;
-      cursor: pointer;
     }
     #status { overflow-wrap: anywhere; }
   </style>
@@ -40,17 +33,17 @@
   <main>
     <section class="welcome">
       <h2>Meet people around the world</h2>
-      <p>Make international friends, discover new cultures, and practise languages.</p>
+      <p>Make international friends and discover new cultures.</p>
     </section>
 
     <section class="account">
       <h2>Join WorldChat</h2>
 
       <div id="accountForm">
-        <input id="name" type="text" placeholder="Your name">
+        <input id="name" placeholder="Your name">
+        <input id="country" placeholder="Your country">
         <input id="email" type="email" placeholder="Your email">
-        <input id="password" type="password" placeholder="Password (at least 6 characters)">
-
+        <input id="password" type="password" placeholder="Password (6+ characters)">
         <button onclick="register()">Create Account</button>
         <button onclick="login()">Login</button>
       </div>
@@ -64,12 +57,11 @@
     </section>
   </main>
 
-  <footer>
-    <p>© 2026 WorldChat</p>
-  </footer>
+  <footer><p>© 2026 WorldChat</p></footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -83,27 +75,38 @@
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
     function showStatus(message) {
       document.getElementById("status").textContent = message;
     }
 
-    function register() {
+    async function register() {
       const name = document.getElementById("name").value.trim();
+      const country = document.getElementById("country").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
-      if (!name || !email || !password) {
+      if (!name || !country || !email || !password) {
         showStatus("Please fill in all fields.");
         return;
       }
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(result => result.user.updateProfile({
-          displayName: name
-        }))
-        .then(() => showStatus("Account created successfully! Welcome to WorldChat."))
-        .catch(error => showStatus(error.message));
+      try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await result.user.updateProfile({ displayName: name });
+
+        await db.collection("users").doc(result.user.uid).set({
+          name: name,
+          country: country,
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showStatus("Welcome! Your account and profile are saved.");
+      } catch (error) {
+        showStatus(error.message);
+      }
     }
 
     function login() {
