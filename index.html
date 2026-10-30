@@ -7,19 +7,25 @@
   <title>WorldChat - Meet the World</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .account {
-      max-width: 400px;
-      margin: 25px auto;
+    .account, .friends {
+      max-width: 450px;
+      margin: 20px auto;
       padding: 20px;
       background: white;
       color: #101827;
       border-radius: 12px;
     }
-    .account input, .account button {
+    input, button {
       box-sizing: border-box;
       width: 100%;
       padding: 12px;
-      margin: 8px 0;
+      margin: 7px 0;
+    }
+    .friend {
+      padding: 12px;
+      margin: 10px 0;
+      background: #eef2f7;
+      border-radius: 8px;
     }
     #status { overflow-wrap: anywhere; }
   </style>
@@ -50,10 +56,18 @@
 
       <div id="userArea" hidden>
         <h3 id="userWelcome"></h3>
+        <button onclick="findFriends()">Find Friends 🌍</button>
         <button onclick="logout()">Logout</button>
       </div>
 
       <p id="status" aria-live="polite"></p>
+    </section>
+
+    <section class="friends" id="friendsArea" hidden>
+      <h2>🌍 Find Friends</h2>
+      <input id="countrySearch" placeholder="Search by country">
+      <button onclick="findFriends()">Search</button>
+      <div id="friendList"></div>
     </section>
   </main>
 
@@ -96,12 +110,18 @@
         const result = await auth.createUserWithEmailAndPassword(email, password);
         await result.user.updateProfile({ displayName: name });
 
-        await db.collection("users").doc(result.user.uid).set({
+        const profile = {
           name: name,
           country: country,
-          email: email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection("users").doc(result.user.uid).set({
+          ...profile,
+          email: email
         });
+
+        await db.collection("publicProfiles").doc(result.user.uid).set(profile);
 
         showStatus("Welcome! Your account and profile are saved.");
       } catch (error) {
@@ -109,29 +129,87 @@
       }
     }
 
-    function login() {
+    async function login() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => showStatus("Login successful!"))
-        .catch(error => showStatus(error.message));
+      try {
+        const result = await auth.signInWithEmailAndPassword(email, password);
+        const privateProfile = await db.collection("users").doc(result.user.uid).get();
+
+        if (privateProfile.exists) {
+          const data = privateProfile.data();
+          await db.collection("publicProfiles").doc(result.user.uid).set({
+            name: data.name || result.user.displayName || "WorldChat member",
+            country: data.country || "Not specified"
+          }, { merge: true });
+        }
+
+        showStatus("Login successful!");
+      } catch (error) {
+        showStatus(error.message);
+      }
+    }
+
+    async function findFriends() {
+      const list = document.getElementById("friendList");
+      const search = document.getElementById("countrySearch").value.trim().toLowerCase();
+
+      list.textContent = "Finding members...";
+
+      try {
+        const snapshot = await db.collection("publicProfiles").get();
+        list.innerHTML = "";
+
+        let count = 0;
+
+        snapshot.forEach(doc => {
+          const person = doc.data();
+
+          if (doc.id === auth.currentUser.uid) return;
+
+          if (search && !(person.country || "").toLowerCase().includes(search)) return;
+
+          const card = document.createElement("div");
+          card.className = "friend";
+
+          const name = document.createElement("strong");
+          name.textContent = person.name || "WorldChat member";
+
+          const country = document.createElement("p");
+          country.textContent = "📍 " + (person.country || "Not specified");
+
+          card.appendChild(name);
+          card.appendChild(country);
+          list.appendChild(card);
+          count++;
+        });
+
+        if (count === 0) {
+          list.textContent = "No other members found yet. Invite a friend to join!";
+        }
+      } catch (error) {
+        list.textContent = "Could not load members: " + error.message;
+      }
     }
 
     function logout() {
-      auth.signOut()
-        .then(() => showStatus("You have logged out."));
+      auth.signOut().then(() => showStatus("You have logged out."));
     }
 
     auth.onAuthStateChanged(user => {
       document.getElementById("accountForm").hidden = !!user;
       document.getElementById("userArea").hidden = !user;
+      document.getElementById("friendsArea").hidden = !user;
 
       if (user) {
         document.getElementById("userWelcome").textContent =
           "Welcome, " + (user.displayName || user.email) + "!";
+      } else {
+        document.getElementById("friendList").textContent = "";
       }
     });
   </script>
 </body>
-</html>
+  </html>
+                                              
