@@ -4,9 +4,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101827">
   <title>WorldChat - Meet the World</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .account {
+      max-width: 400px;
+      margin: 25px auto;
+      padding: 20px;
+      background: white;
+      color: #101827;
+      border-radius: 12px;
+    }
+    .account input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    .account button {
+      padding: 12px;
+      margin: 6px 0;
+      width: 100%;
+      cursor: pointer;
+    }
+    #status { overflow-wrap: anywhere; }
+  </style>
 </head>
 <body>
   <header>
@@ -18,15 +41,26 @@
     <section class="welcome">
       <h2>Meet people around the world</h2>
       <p>Make international friends, discover new cultures, and practise languages.</p>
-      <button onclick="showMessage()">Get Started</button>
-      <p id="message" aria-live="polite"></p>
     </section>
 
-    <section class="features">
-      <h2>Discover a world of friends</h2>
-      <p>🌎 Meet people from different countries</p>
-      <p>💬 Start conversations</p>
-      <p>🤝 Make new friends</p>
+    <section class="account">
+      <h2>Join WorldChat</h2>
+
+      <div id="accountForm">
+        <input id="name" type="text" placeholder="Your name">
+        <input id="email" type="email" placeholder="Your email">
+        <input id="password" type="password" placeholder="Password (at least 6 characters)">
+
+        <button onclick="register()">Create Account</button>
+        <button onclick="login()">Login</button>
+      </div>
+
+      <div id="userArea" hidden>
+        <h3 id="userWelcome"></h3>
+        <button onclick="logout()">Logout</button>
+      </div>
+
+      <p id="status" aria-live="polite"></p>
     </section>
   </main>
 
@@ -34,17 +68,8 @@
     <p>© 2026 WorldChat</p>
   </footer>
 
-  <script>
-    function showMessage() {
-      document.getElementById("message").textContent =
-        "Welcome to WorldChat! Registration is coming soon.";
-    }
-  </script>
-
-  <!-- Firebase connection -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -57,11 +82,53 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-
     const auth = firebase.auth();
-    const db = firebase.firestore();
 
-    console.log("WorldChat connected to Firebase!");
+    function showStatus(message) {
+      document.getElementById("status").textContent = message;
+    }
+
+    function register() {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!name || !email || !password) {
+        showStatus("Please fill in all fields.");
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(result => result.user.updateProfile({
+          displayName: name
+        }))
+        .then(() => showStatus("Account created successfully! Welcome to WorldChat."))
+        .catch(error => showStatus(error.message));
+    }
+
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => showStatus("Login successful!"))
+        .catch(error => showStatus(error.message));
+    }
+
+    function logout() {
+      auth.signOut()
+        .then(() => showStatus("You have logged out."));
+    }
+
+    auth.onAuthStateChanged(user => {
+      document.getElementById("accountForm").hidden = !!user;
+      document.getElementById("userArea").hidden = !user;
+
+      if (user) {
+        document.getElementById("userWelcome").textContent =
+          "Welcome, " + (user.displayName || user.email) + "!";
+      }
+    });
   </script>
 </body>
 </html>
