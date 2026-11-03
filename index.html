@@ -8,27 +8,53 @@
 <title>WorldChat - Meet the World</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#101c35,#183d65,#087e91);color:white;min-height:100vh}
-header{text-align:center;padding:35px 15px}
+body{
+ margin:0;font-family:Arial,sans-serif;
+ background:linear-gradient(135deg,#101c35,#183d65,#087e91);
+ color:white;min-height:100vh
+}
+header{text-align:center;padding:30px 15px}
 header h1{font-size:34px;margin:0 0 10px}
 header p,.welcome p{color:#d6e9f5}
 main{width:92%;max-width:650px;margin:20px auto 50px}
 .welcome{text-align:center;padding:20px 10px}
 .welcome h2{font-size:27px}
 .welcome p{line-height:1.6}
-.panel{background:white;color:#17243a;padding:25px;border-radius:18px;margin:20px 0;box-shadow:0 12px 35px rgba(0,0,0,.2)}
+.panel{
+ background:white;color:#17243a;padding:22px;
+ border-radius:18px;margin:20px 0;
+ box-shadow:0 12px 35px rgba(0,0,0,.2)
+}
 .panel h2{text-align:center;margin-top:0}
-input{display:block;width:100%;padding:14px;margin:12px 0;border:1px solid #d3dce8;border-radius:9px;font-size:16px;background:#f8fafc}
-button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:9px;background:#087e91;color:white;font-size:16px;font-weight:bold;cursor:pointer}
-button:hover{background:#065e70}
+input{
+ display:block;width:100%;padding:14px;margin:12px 0;
+ border:1px solid #d3dce8;border-radius:9px;
+ font-size:16px;background:#f8fafc
+}
+button{
+ width:100%;padding:14px;margin:8px 0;
+ border:0;border-radius:9px;background:#087e91;
+ color:white;font-size:16px;font-weight:bold;cursor:pointer
+}
+button:disabled{opacity:.6}
 .secondary{background:#183d65}
 .logout{background:#dc5261}
-#status,#chatStatus{text-align:center;overflow-wrap:anywhere;line-height:1.5;font-weight:bold}
-.friend{background:#edf5fa;padding:16px;margin:12px 0;border-radius:12px;border-left:4px solid #087e91}
+#status,#chatStatus{text-align:center;overflow-wrap:anywhere;line-height:1.5}
+.friend{
+ background:#edf5fa;padding:16px;margin:12px 0;
+ border-radius:12px;border-left:4px solid #087e91
+}
 .friend strong{font-size:18px}
 .friend p{color:#53657b;margin-bottom:0}
-#messageList{height:350px;overflow-y:auto;padding:12px;background:#f1f5f9;border-radius:12px;margin:15px 0}
-.chat-message{padding:12px;border-radius:12px;margin:10px 0;background:#e2eaf2;overflow-wrap:anywhere;max-width:85%;white-space:pre-wrap}
+#messageList{
+ height:350px;overflow-y:auto;padding:12px;
+ background:#f1f5f9;border-radius:12px;margin:15px 0
+}
+.chat-message{
+ padding:12px;border-radius:12px;margin:10px 0;
+ background:#e2eaf2;overflow-wrap:anywhere;
+ max-width:85%;white-space:pre-wrap
+}
 .chat-message.mine{background:#d8f4e8;margin-left:auto}
 .chat-message.theirs{margin-right:auto}
 .chat-message small{color:#53657b;display:block;margin-bottom:5px}
@@ -40,6 +66,7 @@ footer{text-align:center;padding:20px;color:#d6e9f5}
 </style>
 </head>
 <body>
+
 <header>
 <h1>🌍 WorldChat</h1>
 <p>One world. Millions of conversations.</p>
@@ -82,7 +109,7 @@ footer{text-align:center;padding:20px;color:#d6e9f5}
 
 <section class="panel" id="chatsArea" hidden>
 <h2>💬 My Conversations</h2>
-<div id="myChatList">Loading conversations...</div>
+<div id="myChatList">Your conversations will appear here.</div>
 </section>
 
 <section class="panel" id="chatArea" hidden>
@@ -97,347 +124,379 @@ footer{text-align:center;padding:20px;color:#d6e9f5}
 </section>
 </main>
 
-<footer><p>© 2026 WorldChat | Connecting the World 🌍</p></footer>
+<footer>
+<p>© 2026 WorldChat | Connecting the World 🌍</p>
+</footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig={
-apiKey:"AIzaSyBYCRgvs3_A0Ph7R3nW21GONpCDQFJQhOk",
-authDomain:"worldchat-67ec4.firebaseapp.com",
-projectId:"worldchat-67ec4",
-storageBucket:"worldchat-67ec4.firebasestorage.app",
-messagingSenderId:"319447383919",
-appId:"1:319447383919:web:1dde647d2041618933729a"
+const firebaseConfig = {
+ apiKey: "AIzaSyBYCRgvs3_A0Ph7R3nW21GONpCDQFJQhOk",
+ authDomain: "worldchat-67ec4.firebaseapp.com",
+ projectId: "worldchat-67ec4",
+ storageBucket: "worldchat-67ec4.firebasestorage.app",
+ messagingSenderId: "319447383919",
+ appId: "1:319447383919:web:1dde647d2041618933729a"
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let activeChatId=null;
-let activeFriendUid=null;
-let activeFriendName="";
-let unsubscribeMessages=null;
+let activeChatId = null;
+let activeFriendUid = null;
+let activeFriendName = "";
+let unsubscribeMessages = null;
 
 function showStatus(message){
-document.getElementById("status").textContent=message;
+ document.getElementById("status").textContent = message;
 }
 
 function hideSections(){
-document.getElementById("friendsArea").hidden=true;
-document.getElementById("chatsArea").hidden=true;
-document.getElementById("chatArea").hidden=true;
+ document.getElementById("friendsArea").hidden = true;
+ document.getElementById("chatsArea").hidden = true;
+ document.getElementById("chatArea").hidden = true;
 }
 
 async function register(){
-const name=document.getElementById("name").value.trim();
-const country=document.getElementById("country").value.trim();
-const email=document.getElementById("email").value.trim();
-const password=document.getElementById("password").value;
+ const name = document.getElementById("name").value.trim();
+ const country = document.getElementById("country").value.trim();
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
 
-if(!name||!country||!email||!password){
-showStatus("Please fill in all fields.");
-return;
-}
+ if(!name || !country || !email || !password){
+  showStatus("Please fill in all fields.");
+  return;
+ }
+ if(password.length < 6){
+  showStatus("Password must be at least 6 characters.");
+  return;
+ }
 
-try{
-const result=await auth.createUserWithEmailAndPassword(email,password);
-await result.user.updateProfile({displayName:name});
+ try{
+  const result = await auth.createUserWithEmailAndPassword(email,password);
+  await result.user.updateProfile({displayName:name});
 
-const profile={
-name,
-country,
-createdAt:firebase.firestore.FieldValue.serverTimestamp()
-};
+  const profile = {
+   name:name,
+   country:country,
+   createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
 
-await db.collection("users").doc(result.user.uid).set({...profile,email});
-await db.collection("publicProfiles").doc(result.user.uid).set(profile);
-showStatus("Welcome! Your account and profile are saved.");
-}catch(error){
-showStatus(error.message);
-}
+  await db.collection("users").doc(result.user.uid)
+   .set({...profile,email:email});
+
+  await db.collection("publicProfiles").doc(result.user.uid)
+   .set(profile);
+
+  showStatus("Welcome! Your account and profile are saved.");
+ }catch(error){
+  showStatus(error.message);
+ }
 }
 
 async function login(){
-const email=document.getElementById("email").value.trim();
-const password=document.getElementById("password").value;
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
 
-try{
-const result=await auth.signInWithEmailAndPassword(email,password);
-const uid=result.user.uid;
-const privateProfile=await db.collection("users").doc(uid).get();
+ if(!email || !password){
+  showStatus("Enter your email and password.");
+  return;
+ }
 
-let name=result.user.displayName||
-document.getElementById("name").value.trim()||
-"WorldChat member";
+ try{
+  const result = await auth.signInWithEmailAndPassword(email,password);
+  const uid = result.user.uid;
+  const privateProfile = await db.collection("users").doc(uid).get();
 
-let country=document.getElementById("country").value.trim()||"Not specified";
+  let name = result.user.displayName || "WorldChat member";
+  let country = "Not specified";
 
-if(privateProfile.exists){
-const data=privateProfile.data();
-name=data.name||name;
-country=data.country||country;
-}
+  if(privateProfile.exists){
+   const data = privateProfile.data();
+   name = data.name || name;
+   country = data.country || country;
+  }
 
-const profile={name,country};
+  const profile = {name:name,country:country};
 
-await db.collection("users").doc(uid).set({...profile,email},{merge:true});
-await db.collection("publicProfiles").doc(uid).set(profile,{merge:true});
+  await db.collection("users").doc(uid)
+   .set({...profile,email:email},{merge:true});
 
-showStatus("Login successful! Your profile is ready.");
-}catch(error){
-showStatus(error.message);
-}
+  await db.collection("publicProfiles").doc(uid)
+   .set(profile,{merge:true});
+
+  showStatus("Login successful! Your profile is ready.");
+ }catch(error){
+  showStatus(error.message);
+ }
 }
 
 function showFriends(){
-hideSections();
-document.getElementById("friendsArea").hidden=false;
-findFriends();
+ hideSections();
+ document.getElementById("friendsArea").hidden = false;
+ findFriends();
 }
 
 async function findFriends(){
-const list=document.getElementById("friendList");
-const search=document.getElementById("countrySearch").value.trim().toLowerCase();
+ const list = document.getElementById("friendList");
+ const search = document.getElementById("countrySearch")
+  .value.trim().toLowerCase();
 
-if(!auth.currentUser){
-list.textContent="Please log in first.";
-return;
-}
+ if(!auth.currentUser){
+  list.textContent = "Please log in first.";
+  return;
+ }
 
-list.textContent="Finding members...";
+ list.textContent = "Finding members...";
 
-try{
-const snapshot=await db.collection("publicProfiles").get();
-list.innerHTML="";
-let count=0;
+ try{
+  const snapshot = await db.collection("publicProfiles").get();
+  list.innerHTML = "";
+  let count = 0;
 
-snapshot.forEach(doc=>{
-const person=doc.data();
-if(doc.id===auth.currentUser.uid)return;
-if(search&&!(person.country||"").toLowerCase().includes(search))return;
+  snapshot.forEach(doc => {
+   const person = doc.data();
 
-const card=document.createElement("div");
-card.className="friend";
+   if(doc.id === auth.currentUser.uid) return;
+   if(search && !(person.country || "").toLowerCase().includes(search)) return;
 
-const name=document.createElement("strong");
-name.textContent=person.name||"WorldChat member";
+   const card = document.createElement("div");
+   card.className = "friend";
 
-const country=document.createElement("p");
-country.textContent="📍 "+(person.country||"Not specified");
+   const name = document.createElement("strong");
+   name.textContent = person.name || "WorldChat member";
 
-const button=document.createElement("button");
-button.textContent="Chat 💬";
-button.onclick=()=>openChat(doc.id,person.name||"WorldChat member");
+   const country = document.createElement("p");
+   country.textContent = "📍 " + (person.country || "Not specified");
 
-card.append(name,country,button);
-list.appendChild(card);
-count++;
-});
+   const button = document.createElement("button");
+   button.textContent = "Chat 💬";
+   button.onclick = () => openChat(doc.id,person.name || "WorldChat member");
 
-if(!count)list.textContent="No other members found yet. Invite a friend to join!";
-}catch(error){
-list.textContent="Could not load members: "+error.message;
-}
-}
+   card.append(name,country,button);
+   list.appendChild(card);
+   count++;
+  });
 
-function makeChatId(uid1,uid2){
-return [uid1,uid2].sort().join("_");
+  if(!count){
+   list.textContent = "No other members found yet. Invite a friend to join!";
+  }
+ }catch(error){
+  list.textContent = "Could not load members: " + error.message;
+ }
 }
 
 async function openChat(friendUid,friendName){
-if(!auth.currentUser||friendUid===auth.currentUser.uid)return;
+ if(!auth.currentUser || friendUid === auth.currentUser.uid) return;
 
-hideSections();
-document.getElementById("chatArea").hidden=false;
-document.getElementById("chatTitle").textContent="Chat with "+friendName;
-document.getElementById("messageList").textContent="Opening conversation...";
-document.getElementById("chatStatus").textContent="";
+ hideSections();
+ document.getElementById("chatArea").hidden = false;
+ document.getElementById("chatTitle").textContent = "Chat with " + friendName;
+ document.getElementById("messageList").textContent = "Opening conversation...";
+ document.getElementById("chatStatus").textContent = "";
 
-if(unsubscribeMessages){
-unsubscribeMessages();
-unsubscribeMessages=null;
-}
+ if(unsubscribeMessages){
+  unsubscribeMessages();
+  unsubscribeMessages = null;
+ }
 
-activeFriendUid=friendUid;
-activeFriendName=friendName;
-activeChatId=makeChatId(auth.currentUser.uid,friendUid);
+ activeFriendUid = friendUid;
+ activeFriendName = friendName;
+ activeChatId = null;
 
-try{
-const chatRef=db.collection("chats").doc(activeChatId);
-const chat=await chatRef.get();
+ try{
+  const uid = auth.currentUser.uid;
 
-if(!chat.exists){
-await chatRef.set({
-members:[auth.currentUser.uid,friendUid],
-createdAt:firebase.firestore.FieldValue.serverTimestamp()
-});
-}else{
-const members=chat.data().members||[];
-if(!members.includes(auth.currentUser.uid)||!members.includes(friendUid)){
-throw new Error("This conversation is not available.");
-}
-}
+  const existing = await db.collection("chats")
+   .where("members","array-contains",uid).get();
 
-listenForMessages();
-}catch(error){
-document.getElementById("messageList").textContent="Could not open chat: "+error.message;
-}
+  let chatId = null;
+
+  existing.forEach(doc => {
+   const members = doc.data().members || [];
+   if(members.includes(friendUid)){
+    chatId = doc.id;
+   }
+  });
+
+  if(!chatId){
+   const newChat = await db.collection("chats").add({
+    members:[uid,friendUid],
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+   });
+   chatId = newChat.id;
+  }
+
+  activeChatId = chatId;
+  listenForMessages();
+
+ }catch(error){
+  document.getElementById("messageList").textContent =
+   "Could not open chat: " + error.message;
+ }
 }
 
 function listenForMessages(){
-const list=document.getElementById("messageList");
+ if(!activeChatId) return;
 
-unsubscribeMessages=db.collection("chats").doc(activeChatId)
-.collection("messages")
-.orderBy("createdAt","asc")
-.onSnapshot(snapshot=>{
-list.innerHTML="";
+ const list = document.getElementById("messageList");
 
-if(snapshot.empty){
-list.textContent="No messages yet. Say hello! 👋";
-return;
+ unsubscribeMessages = db.collection("chats").doc(activeChatId)
+  .collection("messages")
+  .orderBy("createdAt","asc")
+  .onSnapshot(snapshot => {
+   list.innerHTML = "";
+
+   if(snapshot.empty){
+    list.textContent = "No messages yet. Say hello! 👋";
+    return;
+   }
+
+   snapshot.forEach(doc => {
+    const message = doc.data();
+    const mine = message.senderId === auth.currentUser.uid;
+
+    const bubble = document.createElement("div");
+    bubble.className = "chat-message " + (mine ? "mine" : "theirs");
+
+    const sender = document.createElement("small");
+    sender.textContent = mine ? "You" : activeFriendName;
+
+    const content = document.createElement("div");
+    content.textContent = message.text || "";
+
+    bubble.append(sender,content);
+    list.appendChild(bubble);
+   });
+
+   list.scrollTop = list.scrollHeight;
+
+  },error => {
+   list.textContent = "Could not load messages: " + error.message;
+  });
 }
 
-snapshot.forEach(doc=>{
-const message=doc.data();
-const mine=message.senderId===auth.currentUser.uid;
+document.getElementById("messageForm").addEventListener("submit",async event => {
+ event.preventDefault();
 
-const bubble=document.createElement("div");
-bubble.className="chat-message "+(mine?"mine":"theirs");
+ if(!auth.currentUser || !activeChatId) return;
 
-const sender=document.createElement("small");
-sender.textContent=mine?"You":activeFriendName;
+ const input = document.getElementById("messageInput");
+ const messageText = input.value.trim();
 
-const content=document.createElement("div");
-content.textContent=message.text||"";
+ if(!messageText) return;
 
-bubble.append(sender,content);
-list.appendChild(bubble);
-});
+ const button = event.submitter;
+ button.disabled = true;
+ document.getElementById("chatStatus").textContent = "Sending...";
 
-list.scrollTop=list.scrollHeight;
-},error=>{
-list.textContent="Could not load messages: "+error.message;
-});
-}
+ try{
+  await db.collection("chats").doc(activeChatId)
+   .collection("messages").add({
+    senderId:auth.currentUser.uid,
+    text:messageText,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+   });
 
-document.getElementById("messageForm").addEventListener("submit",async event=>{
-event.preventDefault();
-
-if(!auth.currentUser||!activeChatId)return;
-
-const input=document.getElementById("messageInput");
-const text=input.value.trim();
-
-if(!text)return;
-
-const button=event.submitter;
-button.disabled=true;
-document.getElementById("chatStatus").textContent="Sending...";
-
-try{
-await db.collection("chats").doc(activeChatId)
-.collection("messages").add({
-senderId:auth.currentUser.uid,
-text,
-createdAt:firebase.firestore.FieldValue.serverTimestamp()
-});
-
-input.value="";
-document.getElementById("chatStatus").textContent="";
-}catch(error){
-document.getElementById("chatStatus").textContent="Message not sent: "+error.message;
-}finally{
-button.disabled=false;
-}
+  input.value = "";
+  document.getElementById("chatStatus").textContent = "";
+ }catch(error){
+  document.getElementById("chatStatus").textContent =
+   "Message not sent: " + error.message;
+ }finally{
+  button.disabled = false;
+ }
 });
 
 async function showMyChats(){
-hideSections();
-document.getElementById("chatsArea").hidden=false;
+ hideSections();
+ document.getElementById("chatsArea").hidden = false;
 
-const list=document.getElementById("myChatList");
-list.textContent="Loading conversations...";
+ const list = document.getElementById("myChatList");
+ list.textContent = "Loading conversations...";
 
-try{
-const snapshot=await db.collection("chats")
-.where("members","array-contains",auth.currentUser.uid).get();
+ try{
+  const snapshot = await db.collection("chats")
+   .where("members","array-contains",auth.currentUser.uid).get();
 
-list.innerHTML="";
+  list.innerHTML = "";
 
-if(snapshot.empty){
-list.textContent="You have no conversations yet. Find a friend to start chatting!";
-return;
-}
+  if(snapshot.empty){
+   list.textContent = "You have no conversations yet. Find a friend to start chatting!";
+   return;
+  }
 
-for(const doc of snapshot.docs){
-const members=doc.data().members||[];
-const otherUid=members.find(uid=>uid!==auth.currentUser.uid);
-if(!otherUid)continue;
+  for(const doc of snapshot.docs){
+   const members = doc.data().members || [];
+   const otherUid = members.find(uid => uid !== auth.currentUser.uid);
+   if(!otherUid) continue;
 
-const profile=await db.collection("publicProfiles").doc(otherUid).get();
-const person=profile.exists?profile.data():{name:"WorldChat member"};
+   const profile = await db.collection("publicProfiles").doc(otherUid).get();
+   const person = profile.exists ? profile.data() : {name:"WorldChat member"};
 
-const card=document.createElement("div");
-card.className="friend";
+   const card = document.createElement("div");
+   card.className = "friend";
 
-const name=document.createElement("strong");
-name.textContent=person.name||"WorldChat member";
+   const name = document.createElement("strong");
+   name.textContent = person.name || "WorldChat member";
 
-const button=document.createElement("button");
-button.textContent="Open Conversation 💬";
-button.onclick=()=>openChat(otherUid,person.name||"WorldChat member");
+   const button = document.createElement("button");
+   button.textContent = "Open Conversation 💬";
+   button.onclick = () => openChat(otherUid,person.name || "WorldChat member");
 
-card.append(name,button);
-list.appendChild(card);
-}
-}catch(error){
-list.textContent="Could not load conversations: "+error.message;
-}
+   card.append(name,button);
+   list.appendChild(card);
+  }
+ }catch(error){
+  list.textContent = "Could not load conversations: " + error.message;
+ }
 }
 
 function backToFriends(){
-if(unsubscribeMessages){
-unsubscribeMessages();
-unsubscribeMessages=null;
-}
-activeChatId=null;
-activeFriendUid=null;
-showFriends();
+ if(unsubscribeMessages){
+  unsubscribeMessages();
+  unsubscribeMessages = null;
+ }
+ activeChatId = null;
+ activeFriendUid = null;
+ showFriends();
 }
 
 function logout(){
-if(unsubscribeMessages){
-unsubscribeMessages();
-unsubscribeMessages=null;
-}
-auth.signOut().then(()=>showStatus("You have logged out."))
-.catch(error=>showStatus(error.message));
+ if(unsubscribeMessages){
+  unsubscribeMessages();
+  unsubscribeMessages = null;
+ }
+ auth.signOut()
+  .then(() => showStatus("You have logged out."))
+  .catch(error => showStatus(error.message));
 }
 
-auth.onAuthStateChanged(user=>{
-document.getElementById("accountForm").hidden=!!user;
-document.getElementById("userArea").hidden=!user;
+auth.onAuthStateChanged(user => {
+ document.getElementById("accountForm").hidden = !!user;
+ document.getElementById("userArea").hidden = !user;
 
-if(user){
-document.getElementById("userWelcome").textContent=
-"Welcome, "+(user.displayName||user.email)+"!";
-}else{
-hideSections();
-document.getElementById("friendList").textContent="";
-document.getElementById("myChatList").textContent="";
-activeChatId=null;
-activeFriendUid=null;
-if(unsubscribeMessages){
-unsubscribeMessages();
-unsubscribeMessages=null;
-}
-}
+ if(user){
+  document.getElementById("userWelcome").textContent =
+   "Welcome, " + (user.displayName || user.email) + "!";
+ }else{
+  hideSections();
+  document.getElementById("friendList").textContent = "";
+  document.getElementById("myChatList").textContent = "";
+  activeChatId = null;
+  activeFriendUid = null;
+
+  if(unsubscribeMessages){
+   unsubscribeMessages();
+   unsubscribeMessages = null;
+  }
+ }
 });
 </script>
 </body>
-</html>
+  </html>
+  
